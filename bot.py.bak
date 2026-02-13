@@ -1,0 +1,30 @@
+import os
+from dotenv import load_dotenv
+from telegram import Update
+from telegram.ext import (
+    ApplicationBuilder, CommandHandler, CallbackQueryHandler,
+    MessageHandler, ContextTypes, filters
+)
+
+from start_handler import start
+from callback_handler import handle_platform_selection
+
+# Load .env
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# Build Application
+app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+# Handlers
+app.add_handler(CommandHandler("start", start))
+app.add_handler(CallbackQueryHandler(handle_platform_selection))
+app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, 
+               lambda update, context: context.bot.send_message(
+                   chat_id=update.effective_chat.id, text="Message received!"
+               )))
+
+# Run bot
+if __name__ == "__main__":
+    print("🚀 T-Bot started...")
+    app.run_polling()
